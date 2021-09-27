@@ -1,2 +1,2 @@
-# Example
-An example greeter plugin
+# InstantDamageCalculator
+A plugin to instantly calculate the hit based on Hitpoints xp drop
