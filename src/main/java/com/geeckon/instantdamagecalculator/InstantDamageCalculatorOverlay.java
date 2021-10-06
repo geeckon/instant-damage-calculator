@@ -34,6 +34,10 @@ class InstantDamageCalculatorOverlay extends OverlayPanel
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		if (!config.displayDamageOverlay()) {
+			return null;
+		}
+
 		final Color strColor = new Color(238, 51, 51);
 		String str = plugin.getHit() + "";
 
