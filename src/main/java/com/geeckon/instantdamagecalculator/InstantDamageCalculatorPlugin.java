@@ -29,7 +29,7 @@ import static net.runelite.api.ScriptID.XPDROPS_SETDROPSIZE;
 @Slf4j
 @PluginDescriptor(
 	name = "InstantDamageCalculator",
-	tags = {"experience", "levels", "tick", "prayer", "xpdrop", "damage", "damagedrop"},
+	tags = {"experience", "levels", "prayer", "xpdrop", "damage", "damagedrop"},
 	conflicts = "XP Drop"
 )
 public class InstantDamageCalculatorPlugin extends Plugin
@@ -61,6 +61,25 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	 * BRYOPHYTA(NpcID.BRYOPHYTA),
 	 * THE_MIMIC(NpcID.THE_MIMIC, NpcID.THE_MIMIC_8633),
 	 * SKOTIZO(NpcID.SKOTIZO),
+	 * TZKAL_ZUK(NpcID.TZKALZUK),
+	 * AHRIM_THE_BLIGHTED(NpcID.AHRIM_THE_BLIGHTED),
+	 * DHAROK_THE_WRETCHED(NpcID.DHAROK_THE_WRETCHED),
+	 * GUTHAN_THE_INFESTED(NpcID.GUTHAN_THE_INFESTED),
+	 * TORAG_THE_CORRUPTED(NpcID.TORAG_THE_CORRUPTED),
+	 * VERAC_THE_DEFILED(NpcID.VERAC_THE_DEFILED),
+	 * GIANT_MOLE(NpcID.GIANT_MOLE, NpcID.GIANT_MOLE_6499),
+	 * DERANGED_ARCHAEOLOGIST(NpcID.DERANGED_ARCHAEOLOGIST),
+	 * DAGANNOTH_REX(NpcID.DAGANNOTH_REX, NpcID.DAGANNOTH_REX_6498),
+	 * DAGANNOTH_PRIME(NpcID.DAGANNOTH_PRIME, NpcID.DAGANNOTH_PRIME_6497),
+	 * SARACHNIS(NpcID.SARACHNIS),
+	 * KALPHITE_QUEEN_CRAWLING(NpcID.KALPHITE_QUEEN, NpcID.KALPHITE_QUEEN_963, NpcID.KALPHITE_QUEEN_4303, NpcID.KALPHITE_QUEEN_6500),
+	 * KALPHITE_QUEEN_AIRBORNE(NpcID.KALPHITE_QUEEN_965, NpcID.KALPHITE_QUEEN_4304, NpcID.KALPHITE_QUEEN_6501),
+	 * KREE_ARRA(NpcID.KREEARRA, NpcID.KREEARRA_6492),
+	 * COMMANDER_ZILYANA(NpcID.COMMANDER_ZILYANA, NpcID.COMMANDER_ZILYANA_6493),
+	 * GENERAL_GRAARDOR(NpcID.GENERAL_GRAARDOR, NpcID.GENERAL_GRAARDOR_6494),
+	 * KRIL_TSUTSAROTH(NpcID.KRIL_TSUTSAROTH, NpcID.KRIL_TSUTSAROTH_6495),
+	 * CORPOREAL_BEAST(NpcID.CORPOREAL_BEAST),
+	  
 	 * TEKTON(NpcID.TEKTON, NpcID.TEKTON_7541, NpcID.TEKTON_7542, NpcID.TEKTON_7545),
 	 * TEKTON_ENRAGED(NpcID.TEKTON_ENRAGED, NpcID.TEKTON_ENRAGED_7544),
 	 * ICE_DEMON(NpcID.ICE_DEMON, NpcID.ICE_DEMON_7585),
@@ -84,13 +103,13 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	 * //        this.ids = Sets.newHashSet(ids);
 	 * //    }
 	 * //
-	 * //    static NPCWithXpBoost getBoss(int id)
+	 * //    static NPCWithXpBoost getNpc(int id)
 	 * //    {
-	 * //        for (NPCWithXpBoost boss : values())
+	 * //        for (NPCWithXpBoost npc : values())
 	 * //        {
-	 * //            if (boss.ids.contains(id))
+	 * //            if (npc.ids.contains(id))
 	 * //            {
-	 * //                return boss;
+	 * //                return npc;
 	 * //            }
 	 * //        }
 	 * //
@@ -99,7 +118,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	 */
 
 	private int xp = -1;
-	private NPC lastOpponent;
+	private NPCWithXpBoost lastOpponent;
 	@Getter
 	private int hit = 0;
 	private int mode = 0;
@@ -123,7 +142,24 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			put(NPCWithXpBoost.BRYOPHYTA, 1.025).
 			put(NPCWithXpBoost.THE_MIMIC, 1.25).
 			put(NPCWithXpBoost.SKOTIZO, 1.375).
-			put("AAAAAAAAAAAAAAA", 1.000000000).
+			put(NPCWithXpBoost.TZKAL_ZUK, 1.575).
+			put(NPCWithXpBoost.AHRIM_THE_BLIGHTED, 1.025).
+			put(NPCWithXpBoost.DHAROK_THE_WRETCHED, 1.15).
+			put(NPCWithXpBoost.GUTHAN_THE_INFESTED, 1.15).
+			put(NPCWithXpBoost.TORAG_THE_CORRUPTED, 1.125).
+			put(NPCWithXpBoost.VERAC_THE_DEFILED, 1.125).
+			put(NPCWithXpBoost.GIANT_MOLE, 1.075).
+			put(NPCWithXpBoost.DERANGED_ARCHAEOLOGIST, 1.375).
+			put(NPCWithXpBoost.DAGANNOTH_REX, 1.3).
+			put(NPCWithXpBoost.DAGANNOTH_PRIME, 1.3).
+			put(NPCWithXpBoost.SARACHNIS, 1.075).
+			put(NPCWithXpBoost.KALPHITE_QUEEN_CRAWLING, 1.05).
+			put(NPCWithXpBoost.KALPHITE_QUEEN_AIRBORNE, 1.125).
+			put(NPCWithXpBoost.KREE_ARRA, 1.4).
+			put(NPCWithXpBoost.COMMANDER_ZILYANA, 1.375).
+			put(NPCWithXpBoost.GENERAL_GRAARDOR, 1.325).
+			put(NPCWithXpBoost.KRIL_TSUTSAROTH, 1.375).
+			put(NPCWithXpBoost.CORPOREAL_BEAST, 1.55).
 			build();
 	private static final ImmutableMap<String, Double[]> XP_MODIFIERS_WITH_MODES = ImmutableMap.<String, Double[]>builder().
 			put(NPCWithXpBoost.TEKTON, new Double[] {1.35, 1.5}).
@@ -177,17 +213,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 				case "You enter the Theatre of Blood (Hard Mode)...":
 					mode = 1;
 					break;
-				case "The raid has begun!":
-					{
-						if (client.getVarbitValue(6385) > 0) {
-							mode = 1;
-							log.info("Starting challenge mode raid");
-						} else {
-							mode = 0;
-							log.info("Starting normal mode raid");
-						}
-					}
-					break;
 			}
 		}
 		else if (chatMessage.getType() == ChatMessageType.FRIENDSCHATNOTIFICATION) {
@@ -224,10 +249,10 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			{
 				double modifier = 1.0;
 
-				if (XP_MODIFIERS_WITH_MODES.containsKey(lastOpponent.getName())) {
-					modifier = XP_MODIFIERS_WITH_MODES.get(lastOpponent.getName())[mode];
+				if (XP_MODIFIERS_WITH_MODES.containsKey(lastOpponent)) {
+					modifier = XP_MODIFIERS_WITH_MODES.get(lastOpponent)[mode];
 				} else {
-					modifier = XP_MODIFIERS.getOrDefault(lastOpponent.getName(), 1.0);
+					modifier = XP_MODIFIERS.getOrDefault(lastOpponent, 1.0);
 				}
 
 				hit = (int) Math.round(diff / 1.33 / modifier);
@@ -249,10 +274,13 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 		if (!(opponent instanceof NPC))
 		{
+		        lastOpponent = null;
 			return;
 		}
 
-		lastOpponent = (NPC) opponent;
+                NPC npc = (NPC) opponent;
+		
+		lastOpponent = NPCWithXpBoost.getNpc(npc.getId());
 	}
 
 	@Subscribe
