@@ -142,11 +142,11 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			if (Text.removeTags(chatMessage.getMessage()).equals("The raid has begun!")) {
 				{
 					if (client.getVarbitValue(6385) > 0) {
+						// Starting challenge mode raid
 						mode = 1;
-						log.info("Starting challenge mode raid");
 					} else {
+						// Starting normal mode raid
 						mode = 0;
-						log.info("Starting normal mode raid");
 					}
 				}
 			}
@@ -197,11 +197,11 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 		if (!(opponent instanceof NPC))
 		{
-		        lastOpponent = null;
+			lastOpponent = null;
 			return;
 		}
 
-                NPC npc = (NPC) opponent;
+		NPC npc = (NPC) opponent;
 		
 		lastOpponent = NPCWithXpBoost.getNpc(npc.getId());
 	}
@@ -230,10 +230,10 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		PrayerType prayer = getActivePrayerType();
 
 		final IntStream spriteIDs =
-				Arrays.stream(children)
-						.skip(1) // skip text
-						.filter(Objects::nonNull)
-						.mapToInt(Widget::getSpriteId);
+			Arrays.stream(children)
+				.skip(1) // skip text
+				.filter(Objects::nonNull)
+				.mapToInt(Widget::getSpriteId);
 
 		if (prayer == null)
 		{
@@ -294,7 +294,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		if (spriteIDs.anyMatch(id -> id == SpriteID.SKILL_HITPOINTS))
 		{
 			widget.setText(hit + "");
-		} else {
+		} else if (spriteIDs.anyMatch(id -> id == SpriteID.SKILL_ATTACK || id == SpriteID.SKILL_STRENGTH ||
+				id == SpriteID.SKILL_DEFENCE || id == SpriteID.SKILL_RANGED || id == SpriteID.SKILL_MAGIC)) {
 			widget.setText("");
 		}
 	}

@@ -13,7 +13,7 @@ public interface InstantDamageCalculatorConfig extends Config
     @ConfigItem(
             keyName = "replaceXpDrops",
             name = "Replace XP drops",
-            description = "If enabled, xp drops will be replaced with the damage dealt",
+            description = "If enabled, combat xp drops will be replaced with the damage dealt",
             position = 0
     )
     default boolean replaceXpDrops()
