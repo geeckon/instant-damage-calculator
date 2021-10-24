@@ -25,8 +25,7 @@ import static net.runelite.api.ScriptID.XPDROPS_SETDROPSIZE;
 @Slf4j
 @PluginDescriptor(
 	name = "InstantDamageCalculator",
-	tags = {"experience", "levels", "prayer", "xpdrop", "damage", "damagedrop"},
-	conflicts = "XP Drop"
+	tags = {"experience", "levels", "prayer", "xpdrop", "damage", "damagedrop"}
 )
 public class InstantDamageCalculatorPlugin extends Plugin
 {
@@ -47,7 +46,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	@Getter
 	private int hit = 0;
 	private int mode = 0;
-	private boolean correctPrayer;
 	private static final ImmutableMap<NPCWithXpBoost, Double> XP_MODIFIERS = ImmutableMap.<NPCWithXpBoost, Double>builder().
 		put(NPCWithXpBoost.CERBERUS, 1.15).
 		put(NPCWithXpBoost.ABYSSAL_SIRE, 1.125).
@@ -206,7 +204,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		lastOpponent = NPCWithXpBoost.getNpc(npc.getId());
 	}
 
-	@Subscribe
+	@Subscribe(
+		priority = 1
+	)
 	public void onScriptPreFired(ScriptPreFired scriptPreFired)
 	{
 		if (scriptPreFired.getScriptId() == XPDROPS_SETDROPSIZE)
@@ -227,115 +227,45 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		// child 0 is the xpdrop text, everything else are sprite ids for skills
 		final Widget text = children[0];
 
-		PrayerType prayer = getActivePrayerType();
-
-		final IntStream spriteIDs =
+		final int[] spriteIDs =
 			Arrays.stream(children)
 				.skip(1) // skip text
 				.filter(Objects::nonNull)
-				.mapToInt(Widget::getSpriteId);
-
-		if (prayer == null)
-		{
-			replaceXpDrops(text, spriteIDs);
-			hideSkillIcons(xpdrop);
-			resetTextColor(text);
-			return;
-		}
-
-		int color = 0;
-
-		switch (prayer)
-		{
-			case MELEE:
-				if (correctPrayer || spriteIDs.anyMatch(id ->
-						id == SpriteID.SKILL_ATTACK || id == SpriteID.SKILL_STRENGTH || id == SpriteID.SKILL_DEFENCE))
-				{
-					color = config.getMeleePrayerColor().getRGB();
-					correctPrayer = true;
-				}
-				break;
-			case RANGE:
-				if (correctPrayer || spriteIDs.anyMatch(id -> id == SpriteID.SKILL_RANGED))
-				{
-					color = config.getRangePrayerColor().getRGB();
-					correctPrayer = true;
-				}
-				break;
-			case MAGIC:
-				if (correctPrayer || spriteIDs.anyMatch(id -> id == SpriteID.SKILL_MAGIC))
-				{
-					color = config.getMagePrayerColor().getRGB();
-					correctPrayer = true;
-				}
-				break;
-		}
-
-		if (color != 0)
-		{
-			text.setTextColor(color);
-		}
-		else
-		{
-			resetTextColor(text);
-		}
+				.mapToInt(Widget::getSpriteId)
+				.toArray();
 
 		replaceXpDrops(text, spriteIDs);
-		hideSkillIcons(xpdrop);
 	}
 
-	private void replaceXpDrops(Widget widget, IntStream spriteIDs)
+	private boolean anyMatch(int id) {
+		log.info("id " + id);
+		return id == SpriteID.SKILL_HITPOINTS;
+	}
+
+	private void replaceXpDrops(Widget text, int[] spriteIDs)
 	{
 		if (!config.replaceXpDrops()) {
 			return;
 		}
 
-		// Only display hit on the HP xp drop. Remove all others
-		if (spriteIDs.anyMatch(id -> id == SpriteID.SKILL_HITPOINTS))
-		{
-			widget.setText(hit + "");
-		} else if (spriteIDs.anyMatch(id -> id == SpriteID.SKILL_ATTACK || id == SpriteID.SKILL_STRENGTH ||
-				id == SpriteID.SKILL_DEFENCE || id == SpriteID.SKILL_RANGED || id == SpriteID.SKILL_MAGIC)) {
-			widget.setText("");
-		}
-	}
+		boolean hasOtherCombatDrop = false;
 
-	private void resetTextColor(Widget widget)
-	{
-		Color standardColor = config.standardColor();
-		if (standardColor != null)
-		{
-			int color = standardColor.getRGB();
-			widget.setTextColor(color);
-		}
-		else
-		{
-			EnumComposition colorEnum = client.getEnum(EnumID.XPDROP_COLORS);
-			int defaultColorId = client.getVar(Varbits.EXPERIENCE_DROP_COLOR);
-			int color = colorEnum.getIntValue(defaultColorId);
-			widget.setTextColor(color);
-		}
-	}
-
-	private void hideSkillIcons(Widget xpdrop)
-	{
-		if (config.hideSkillIcons())
-		{
-			Widget[] children = xpdrop.getChildren();
-			// keep only text
-			Arrays.fill(children, 1, children.length, null);
-		}
-	}
-
-	private PrayerType getActivePrayerType()
-	{
-		for (XpPrayer prayer : XpPrayer.values())
-		{
-			if (client.isPrayerActive(prayer.getPrayer()))
-			{
-				return prayer.getType();
+		for (int i = 1; i < spriteIDs.length; i++) {
+			int spriteId = spriteIDs[i];
+			if (spriteId == SpriteID.SKILL_HITPOINTS) {
+				// If xp drop contains HITPOINTS sprite, replace it with the hit
+				text.setText(hit + "");
+				return;
+			} else if (spriteId == SpriteID.SKILL_ATTACK || spriteId == SpriteID.SKILL_STRENGTH ||
+					spriteId == SpriteID.SKILL_DEFENCE || spriteId == SpriteID.SKILL_RANGED ||
+					spriteId == SpriteID.SKILL_MAGIC) {
+				hasOtherCombatDrop = true;
 			}
 		}
-		return null;
+
+		// If xp drop contains any other combat sprite, remove it
+		if (hasOtherCombatDrop) {
+			text.setText("");
+		}
 	}
 }
