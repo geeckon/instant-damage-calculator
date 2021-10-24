@@ -237,11 +237,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		replaceXpDrops(text, spriteIDs);
 	}
 
-	private boolean anyMatch(int id) {
-		log.info("id " + id);
-		return id == SpriteID.SKILL_HITPOINTS;
-	}
-
 	private void replaceXpDrops(Widget text, int[] spriteIDs)
 	{
 		if (!config.replaceXpDrops()) {
