@@ -245,7 +245,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 		boolean hasOtherCombatDrop = false;
 
-		for (int i = 1; i < spriteIDs.length; i++) {
+		for (int i = 0; i < spriteIDs.length; i++) {
 			int spriteId = spriteIDs[i];
 			if (spriteId == SpriteID.SKILL_HITPOINTS) {
 				// If xp drop contains HITPOINTS sprite, replace it with the hit
