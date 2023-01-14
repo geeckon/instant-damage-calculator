@@ -11,6 +11,7 @@ import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -43,6 +44,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 	private int xp = -1;
 	private NPCWithXpBoost lastOpponent;
+
+	private int lastOpponentID = -1;
 	@Getter
 	private int hit = 0;
 	private int mode = 0;
@@ -98,6 +101,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.MUTTADILE_LARGE, new Double[] {1.2, 1.35}).
 		build();
 
+	private HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
+
 	@Provides
 	InstantDamageCalculatorConfig provideConfig(ConfigManager configManager)
 	{
@@ -105,9 +110,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	}
 
 	@Override
-	protected void startUp() throws Exception
-	{
+	protected void startUp() throws Exception {
 		overlayManager.add(overlay);
+		reloadCustomXP();
 
 		log.info("InstantDamageCalculator started!");
 	}
@@ -118,6 +123,13 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		overlayManager.remove(overlay);
 
 		log.info("InstantDamageCalculator stopped!");
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged configChanged) {
+		if (configChanged.getKey().equals("customBonusXP")) {
+			reloadCustomXP();
+		}
 	}
 
 	@Subscribe
@@ -170,7 +182,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			{
 				double modifier = 1.0;
 
-				if (XP_MODIFIERS_WITH_MODES.containsKey(lastOpponent)) {
+				if(CUSTOM_XP_MODIFIERS.containsKey(lastOpponentID)) {
+					modifier = CUSTOM_XP_MODIFIERS.get(lastOpponentID);
+				} else if (XP_MODIFIERS_WITH_MODES.containsKey(lastOpponent)) {
 					modifier = XP_MODIFIERS_WITH_MODES.get(lastOpponent)[mode];
 				} else {
 					modifier = XP_MODIFIERS.getOrDefault(lastOpponent, 1.0);
@@ -196,12 +210,14 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		if (!(opponent instanceof NPC))
 		{
 			lastOpponent = null;
+			lastOpponentID = -1;
 			return;
 		}
 
 		NPC npc = (NPC) opponent;
-		
-		lastOpponent = NPCWithXpBoost.getNpc(npc.getId());
+
+		lastOpponentID = npc.getId();
+		lastOpponent = NPCWithXpBoost.getNpc(lastOpponentID);
 	}
 
 	@Subscribe(
@@ -262,5 +278,31 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		if (hasOtherCombatDrop) {
 			text.setText("");
 		}
+	}
+
+	private void reloadCustomXP() {
+		CUSTOM_XP_MODIFIERS.clear();
+
+		for (String customRaw : config.customBonusXP().split("\n"))
+		{
+			if (customRaw.trim().equals("")) continue;
+			String[] split = customRaw.split(":");
+			if (split.length != 2) continue;
+
+			Integer customID;
+			Double customXP;
+			try
+			{
+				customID = Integer.parseInt(split[0].trim());
+				customXP = Double.parseDouble(split[1].trim());
+				if(customID > 0 && customXP > 0) {
+					CUSTOM_XP_MODIFIERS.put(customID, customXP);
+				}
+			}
+			catch (NumberFormatException e)
+			{
+			}
+		}
+
 	}
 }
