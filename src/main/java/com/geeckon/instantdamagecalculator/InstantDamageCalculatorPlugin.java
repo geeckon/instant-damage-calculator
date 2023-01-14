@@ -44,8 +44,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 	private int xp = -1;
 	private NPCWithXpBoost lastOpponent;
-
 	private int lastOpponentID = -1;
+
 	@Getter
 	private int hit = 0;
 	private int mode = 0;
@@ -110,7 +110,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	}
 
 	@Override
-	protected void startUp() throws Exception {
+	protected void startUp() throws Exception
+	{
 		overlayManager.add(overlay);
 		reloadCustomXP();
 
@@ -126,7 +127,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	}
 
 	@Subscribe
-	public void onConfigChanged(ConfigChanged configChanged) {
+	public void onConfigChanged(ConfigChanged configChanged)
+	{
 		if (configChanged.getKey().equals("customBonusXP")) {
 			reloadCustomXP();
 		}
@@ -280,7 +282,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		}
 	}
 
-	private void reloadCustomXP() {
+	private void reloadCustomXP()
+	{
 		CUSTOM_XP_MODIFIERS.clear();
 
 		for (String customRaw : config.customBonusXP().split("\n"))

@@ -74,9 +74,5 @@ public enum NPCWithXpBoost {
 
         return null;
     }
-
-    void reloadCustomXP() {
-
-    };
     
 }
