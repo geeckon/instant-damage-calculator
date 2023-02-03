@@ -99,6 +99,12 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.SKELETAL_MYSTIC, new Double[] {1.2, 1.3}).
 		put(NPCWithXpBoost.MUTTADILE_SMALL, new Double[] {1.125, 1.225}).
 		put(NPCWithXpBoost.MUTTADILE_LARGE, new Double[] {1.2, 1.35}).
+		put(NPCWithXpBoost.PESTILENT_BLOAT, new Double[] {1.85, 1.975, 1.075}).
+		put(NPCWithXpBoost.NYLOCAS_VASILIAS, new Double[] {1.225, 1.225, 1.025}).
+		put(NPCWithXpBoost.SOTETSEG, new Double[] {1.675, 1.675, 1.045}).
+		put(NPCWithXpBoost.VERZIK_VITUR_P1, new Double[] {1.05, 1.05, 1.05}).
+		put(NPCWithXpBoost.VERZIK_VITUR_P2, new Double[] {1.425, 1.425, 1.425}).
+		put(NPCWithXpBoost.VERZIK_VITUR_P3, new Double[] {1.85, 1.85, 1.85}).
 		build();
 
 	private HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
