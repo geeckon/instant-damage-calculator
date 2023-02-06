@@ -49,6 +49,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	@Getter
 	private int hit = 0;
 	private int mode = 0;
+	
 	private static final ImmutableMap<NPCWithXpBoost, Double> XP_MODIFIERS = ImmutableMap.<NPCWithXpBoost, Double>builder().
 		put(NPCWithXpBoost.CERBERUS, 1.15).
 		put(NPCWithXpBoost.ABYSSAL_SIRE, 1.125).
