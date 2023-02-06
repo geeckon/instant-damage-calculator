@@ -49,7 +49,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	@Getter
 	private int hit = 0;
 	private int mode = 0;
-	
+
 	private static final ImmutableMap<NPCWithXpBoost, Double> XP_MODIFIERS = ImmutableMap.<NPCWithXpBoost, Double>builder().
 		put(NPCWithXpBoost.CERBERUS, 1.15).
 		put(NPCWithXpBoost.ABYSSAL_SIRE, 1.125).
@@ -79,12 +79,17 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.DAGANNOTH_REX, 1.3).
 		put(NPCWithXpBoost.DAGANNOTH_PRIME, 1.3).
 		put(NPCWithXpBoost.SARACHNIS, 1.075).
+		put(NPCWithXpBoost.SPAWN_OF_SARACHNIS, 1.025).
 		put(NPCWithXpBoost.KALPHITE_QUEEN_CRAWLING, 1.05).
 		put(NPCWithXpBoost.KALPHITE_QUEEN_AIRBORNE, 1.125).
 		put(NPCWithXpBoost.KREE_ARRA, 1.4).
+		put(NPCWithXpBoost.WINGMAN_SKREE, 1.025).
 		put(NPCWithXpBoost.COMMANDER_ZILYANA, 1.375).
+		put(NPCWithXpBoost.STARLIGHT, 1.05).
 		put(NPCWithXpBoost.GENERAL_GRAARDOR, 1.325).
 		put(NPCWithXpBoost.KRIL_TSUTSAROTH, 1.375).
+		put(NPCWithXpBoost.SNAKELING, 1.025).
+		put(NPCWithXpBoost.PHANTOM_MUSPAH, 2.075).
 		put(NPCWithXpBoost.CORPOREAL_BEAST, 1.55).
 		put(NPCWithXpBoost.BANDIT_130, 1.025).
 		put(NPCWithXpBoost.BLACK_DRAGON, 1.05).
@@ -221,6 +226,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.VANGUARD_MAGIC, new Double[] {1.275, 1.40}).
 		put(NPCWithXpBoost.GUARDIAN, new Double[] {1.075, 1.1}).
 		put(NPCWithXpBoost.VASA_NISTIRIO, new Double[] {1.075, 1.1}).
+		put(NPCWithXpBoost.VASA_CRYSTALS, new Double[] {1.025, 1.025}).
 		put(NPCWithXpBoost.SKELETAL_MYSTIC, new Double[] {1.2, 1.3}).
 		put(NPCWithXpBoost.MUTTADILE_SMALL, new Double[] {1.125, 1.225}).
 		put(NPCWithXpBoost.MUTTADILE_LARGE, new Double[] {1.2, 1.35}).
