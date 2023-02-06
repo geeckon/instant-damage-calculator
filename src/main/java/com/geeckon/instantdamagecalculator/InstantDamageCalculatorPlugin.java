@@ -67,8 +67,12 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.OBOR, 1.075).
 		put(NPCWithXpBoost.BRYOPHYTA, 1.025).
 		put(NPCWithXpBoost.THE_MIMIC, 1.25).
+		put(NPCWithXpBoost.THIRD_AGE_WARRIOR, 1.075).
 		put(NPCWithXpBoost.SKOTIZO, 1.375).
 		put(NPCWithXpBoost.TZKAL_ZUK, 1.575).
+		put(NPCWithXpBoost.JAL_AK, 1.025).
+		put(NPCWithXpBoost.JAL_IMKOT, 1.075).
+		put(NPCWithXpBoost.RABBIT, 2.125).
 		put(NPCWithXpBoost.AHRIM_THE_BLIGHTED, 1.025).
 		put(NPCWithXpBoost.DHAROK_THE_WRETCHED, 1.15).
 		put(NPCWithXpBoost.GUTHAN_THE_INFESTED, 1.15).
@@ -91,6 +95,10 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.SNAKELING, 1.025).
 		put(NPCWithXpBoost.PHANTOM_MUSPAH, 2.075).
 		put(NPCWithXpBoost.CORPOREAL_BEAST, 1.55).
+		put(NPCWithXpBoost.NEX, 2.525).
+		put(NPCWithXpBoost.UMBRA, 1.075).
+		put(NPCWithXpBoost.CRUOR, 1.05).
+		put(NPCWithXpBoost.GLACIES, 1.05).
 		put(NPCWithXpBoost.BANDIT_130, 1.025).
 		put(NPCWithXpBoost.BLACK_DRAGON, 1.05).
 		put(NPCWithXpBoost.BRUTAL_BLACK_DRAGON, 1.1).
