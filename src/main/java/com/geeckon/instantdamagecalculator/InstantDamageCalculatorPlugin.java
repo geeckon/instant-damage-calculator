@@ -66,6 +66,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.OBOR, 1.075).
 		put(NPCWithXpBoost.BRYOPHYTA, 1.025).
 		put(NPCWithXpBoost.THE_MIMIC, 1.25).
+		put(NPCWithXpBoost.THIRD_AGE_WARRIOR, 1.075).
 		put(NPCWithXpBoost.SKOTIZO, 1.375).
 		put(NPCWithXpBoost.TZKAL_ZUK, 1.575).
 		put(NPCWithXpBoost.JAL_AK, 1.025).
@@ -81,12 +82,16 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.DAGANNOTH_REX, 1.3).
 		put(NPCWithXpBoost.DAGANNOTH_PRIME, 1.3).
 		put(NPCWithXpBoost.SARACHNIS, 1.075).
+		put(NPCWithXpBoost.SPAWN_OF_SARACHNIS, 1.025).
 		put(NPCWithXpBoost.KALPHITE_QUEEN_CRAWLING, 1.05).
 		put(NPCWithXpBoost.KALPHITE_QUEEN_AIRBORNE, 1.125).
 		put(NPCWithXpBoost.KREE_ARRA, 1.4).
+		put(NPCWithXpBoost.WINGMAN_SKREE, 1.025).
 		put(NPCWithXpBoost.COMMANDER_ZILYANA, 1.375).
+		put(NPCWithXpBoost.STARLIGHT, 1.05).
 		put(NPCWithXpBoost.GENERAL_GRAARDOR, 1.325).
 		put(NPCWithXpBoost.KRIL_TSUTSAROTH, 1.375).
+		put(NPCWithXpBoost.SNAKELING, 1.025).
 		put(NPCWithXpBoost.PHANTOM_MUSPAH, 2.075).
 		put(NPCWithXpBoost.CORPOREAL_BEAST, 1.55).
 		put(NPCWithXpBoost.NEX, 2.525).
@@ -104,6 +109,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.VANGUARD_MAGIC, new Double[] {1.275, 1.40}).
 		put(NPCWithXpBoost.GUARDIAN, new Double[] {1.075, 1.1}).
 		put(NPCWithXpBoost.VASA_NISTIRIO, new Double[] {1.075, 1.1}).
+		put(NPCWithXpBoost.VASA_CRYSTALS, new Double[] {1.025, 1.025}).
 		put(NPCWithXpBoost.SKELETAL_MYSTIC, new Double[] {1.2, 1.3}).
 		put(NPCWithXpBoost.MUTTADILE_SMALL, new Double[] {1.125, 1.225}).
 		put(NPCWithXpBoost.MUTTADILE_LARGE, new Double[] {1.2, 1.35}).
