@@ -68,6 +68,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.THE_MIMIC, 1.25).
 		put(NPCWithXpBoost.SKOTIZO, 1.375).
 		put(NPCWithXpBoost.TZKAL_ZUK, 1.575).
+		put(NPCWithXpBoost.JAL_AK, 1.025).
+		put(NPCWithXpBoost.JAL_IMKOT, 1.075).
+		put(NPCWithXpBoost.RABBIT, 2.125).
 		put(NPCWithXpBoost.AHRIM_THE_BLIGHTED, 1.025).
 		put(NPCWithXpBoost.DHAROK_THE_WRETCHED, 1.15).
 		put(NPCWithXpBoost.GUTHAN_THE_INFESTED, 1.15).
@@ -84,7 +87,12 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.COMMANDER_ZILYANA, 1.375).
 		put(NPCWithXpBoost.GENERAL_GRAARDOR, 1.325).
 		put(NPCWithXpBoost.KRIL_TSUTSAROTH, 1.375).
+		put(NPCWithXpBoost.PHANTOM_MUSPAH, 2.075).
 		put(NPCWithXpBoost.CORPOREAL_BEAST, 1.55).
+		put(NPCWithXpBoost.NEX, 2.525).
+		put(NPCWithXpBoost.UMBRA, 1.075).
+		put(NPCWithXpBoost.CRUOR, 1.05).
+		put(NPCWithXpBoost.GLACIES, 1.05).
 		build();
 	private static final ImmutableMap<NPCWithXpBoost, Double[]> XP_MODIFIERS_WITH_MODES = ImmutableMap.<NPCWithXpBoost, Double[]>builder().
 		put(NPCWithXpBoost.TEKTON, new Double[] {1.35, 1.5}).
@@ -102,9 +110,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		put(NPCWithXpBoost.PESTILENT_BLOAT, new Double[] {1.85, 1.975, 1.075}).
 		put(NPCWithXpBoost.NYLOCAS_VASILIAS, new Double[] {1.225, 1.225, 1.025}).
 		put(NPCWithXpBoost.SOTETSEG, new Double[] {1.675, 1.675, 1.045}).
-		put(NPCWithXpBoost.VERZIK_VITUR_P1, new Double[] {1.05, 1.05, 1.05}).
-		put(NPCWithXpBoost.VERZIK_VITUR_P2, new Double[] {1.425, 1.425, 1.425}).
-		put(NPCWithXpBoost.VERZIK_VITUR_P3, new Double[] {1.85, 1.85, 1.85}).
+		put(NPCWithXpBoost.VERZIK_VITUR_P1, new Double[] {1.05, 1.05, 1.005}).
+		put(NPCWithXpBoost.VERZIK_VITUR_P2, new Double[] {1.425, 1.425, 1.025}).
+		put(NPCWithXpBoost.VERZIK_VITUR_P3, new Double[] {1.85, 1.85, 1.125}).
 		build();
 
 	private HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
