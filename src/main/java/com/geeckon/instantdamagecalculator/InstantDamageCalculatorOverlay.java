@@ -42,7 +42,6 @@ class InstantDamageCalculatorOverlay extends OverlayPanel
 		String str = plugin.getHit() + "";
 
 		panelComponent.getChildren().add(LineComponent.builder()
-				.left("Current hit")
 				.right(str)
 				.rightColor(strColor)
 				.build());
