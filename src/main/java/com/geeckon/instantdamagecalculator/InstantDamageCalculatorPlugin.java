@@ -54,13 +54,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	private int hit = 0;
 	private int mode = 0;
 
-	private int toaRaidLevel = 0;
-	private int toaGroupSize = 0;
-	private int toaScabarasLevel = 0;
-	private int toaHetLevel = 0;
-	private int toaApmekenLevel = 0;
-	private int toaCrondisLevel = 0;
-
 	private static final ImmutableMap<NPCWithXpBoost, Double> XP_MODIFIERS = ImmutableMap.<NPCWithXpBoost, Double>builder().
 		put(NPCWithXpBoost.CERBERUS, 1.15).
 		put(NPCWithXpBoost.ABYSSAL_SIRE, 1.125).
@@ -534,8 +527,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		int apmekenWidget = 53;
 		int crondisWidget = 55;
 
-		toaRaidLevel = client.getVarbitValue(Varbits.TOA_RAID_LEVEL);
-		toaGroupSize = 0;
+		int toaRaidLevel = client.getVarbitValue(Varbits.TOA_RAID_LEVEL);
+		int toaGroupSize = 0;
 		if (client.getVarbitValue(Varbits.TOA_MEMBER_0_HEALTH) > 0) toaGroupSize++;
 		if (client.getVarbitValue(Varbits.TOA_MEMBER_1_HEALTH) > 0) toaGroupSize++;
 		if (client.getVarbitValue(Varbits.TOA_MEMBER_2_HEALTH) > 0) toaGroupSize++;
@@ -547,6 +540,11 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 		// failsafe?
 		if (toaGroupSize == 0) toaGroupSize = 1;
+
+		int toaScabarasLevel;
+		int toaHetLevel;
+		int toaApmekenLevel;
+		int toaCrondisLevel;
 
 		try
 		{
@@ -563,8 +561,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		{
 			return;
 		}
-
-		System.out.printf("Updated ToA info: Group size %d | Raid Level %d | Kephri %d | Akkha %d | Ba-Ba %d | Zebak %d\n", toaGroupSize, toaRaidLevel, toaScabarasLevel, toaHetLevel, toaApmekenLevel, toaCrondisLevel);
 
 		// HP multiplier from raid level
 		// 5 raid levels is worth +2% health
@@ -592,8 +588,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		double akkhaMultiplier  = commonMultiplier*hetMultiplier;
 		double babaMultiplier   = commonMultiplier*apmekenMultiplier;
 		double zebakMultiplier  = commonMultiplier*crondisMultiplier;
-
-		System.out.printf("Common: %.2f | Kephri: %.2f | Akkha: %.2f | Ba-ba: %.2f | Zebak: %.2f\n", commonMultiplier, kephriMultiplier, akkhaMultiplier, babaMultiplier, zebakMultiplier);
 
 		// Path of Scabaras
 		TOA_XP_MODIFIERS.put(NPCWithXpBoost.KEPHRI,          calculateToaModifier(NPCWithXpBoost.KEPHRI,          kephriMultiplier));
