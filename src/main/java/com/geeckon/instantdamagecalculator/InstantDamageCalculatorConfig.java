@@ -19,25 +19,25 @@ public interface InstantDamageCalculatorConfig extends Config
     }
 
     @ConfigItem(
-            keyName = "displayOverlayText",
-            name = "Display overlay text",
-            description = "If enabled, informative text is displayed in the overlay",
-            position = 1
-    )
-    default boolean displayOverlayText()
-    {
-        return true;
-    }
-
-    @ConfigItem(
-            keyName = "displayDamageOverlayText",
+            keyName = "displayDamageOverlay",
             name = "Display damage overlay",
             description = "If enabled, an overlay is displayed which shows the latest damage hit",
-            position = 2
+            position = 1
     )
     default boolean displayDamageOverlay()
     {
         return false;
+    }
+
+    @ConfigItem(
+            keyName = "displayOverlayText",
+            name = "Display overlay text",
+            description = "If enabled, informative text is displayed in the overlay",
+            position = 2
+    )
+    default boolean displayOverlayText()
+    {
+        return true;
     }
 
     @ConfigItem(
