@@ -39,12 +39,26 @@ class InstantDamageCalculatorOverlay extends OverlayPanel
 		}
 
 		final Color strColor = new Color(238, 51, 51);
-		String str = plugin.getHit() + "";
+		final String str = String.valueOf(plugin.getHit());
+		final String leftText = config.displayOverlayText() ? "Current hit:" : "";
 
 		panelComponent.getChildren().add(LineComponent.builder()
+				.left(leftText)
 				.right(str)
 				.rightColor(strColor)
 				.build());
+
+
+		if (config.displayTotalDamageOverlay()) {
+			final String totalStr = String.valueOf(plugin.getTotalHit());
+			final String leftTotalText = config.displayOverlayText() ? "Total hit:" : "";
+
+			panelComponent.getChildren().add(LineComponent.builder()
+					.left(leftTotalText)
+					.right(totalStr)
+					.rightColor(strColor)
+					.build());
+		}
 
 		return super.render(graphics);
 	}
