@@ -289,8 +289,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	private HashMap<NPCWithXpBoost, Double> TOA_XP_MODIFIERS = new HashMap<NPCWithXpBoost, Double>();
 
 	private HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
-  
-	private final HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
 
 	@Provides
 	InstantDamageCalculatorConfig provideConfig(ConfigManager configManager) {
