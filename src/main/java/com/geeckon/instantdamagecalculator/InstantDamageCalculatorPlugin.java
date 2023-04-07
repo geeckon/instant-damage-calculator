@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -30,6 +31,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 {
 	@Inject
 	private Client client;
+
+	@Inject
+	private ClientThread clientThread;
 
 	@Inject
 	private InstantDamageCalculatorConfig config;
@@ -228,27 +232,64 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			build();
 
 	private static final ImmutableMap<NPCWithXpBoost, Double[]> XP_MODIFIERS_WITH_MODES = ImmutableMap.<NPCWithXpBoost, Double[]>builder().
-			put(NPCWithXpBoost.TEKTON, new Double[] {1.35, 1.5}).
-			put(NPCWithXpBoost.TEKTON_ENRAGED, new Double[] {1.525, 1.775}).
-			put(NPCWithXpBoost.ICE_DEMON, new Double[] {1.525, 1.775}).
-			put(NPCWithXpBoost.LIZARDMAN_SHAMAN, new Double[] {1.175, 1.275}).
-			put(NPCWithXpBoost.VANGUARD_MELEE, new Double[] {1.075, 1.125}).
-			put(NPCWithXpBoost.VANGUARD_RANGED, new Double[] {1.05, 1.075}).
-			put(NPCWithXpBoost.VANGUARD_MAGIC, new Double[] {1.275, 1.40}).
-			put(NPCWithXpBoost.GUARDIAN, new Double[] {1.075, 1.1}).
-			put(NPCWithXpBoost.VASA_NISTIRIO, new Double[] {1.075, 1.1}).
-			put(NPCWithXpBoost.VASA_CRYSTALS, new Double[] {1.025, 1.025}).
-			put(NPCWithXpBoost.SKELETAL_MYSTIC, new Double[] {1.2, 1.3}).
-			put(NPCWithXpBoost.MUTTADILE_SMALL, new Double[] {1.125, 1.225}).
-			put(NPCWithXpBoost.MUTTADILE_LARGE, new Double[] {1.2, 1.35}).
-			put(NPCWithXpBoost.PESTILENT_BLOAT, new Double[] {1.85, 1.975, 1.075}).
-			put(NPCWithXpBoost.NYLOCAS_VASILIAS, new Double[] {1.225, 1.225, 1.025}).
-			put(NPCWithXpBoost.SOTETSEG, new Double[] {1.675, 1.675, 1.045}).
-			put(NPCWithXpBoost.VERZIK_VITUR_P1, new Double[] {1.05, 1.05, 1.005}).
-			put(NPCWithXpBoost.VERZIK_VITUR_P2, new Double[] {1.425, 1.425, 1.025}).
-			put(NPCWithXpBoost.VERZIK_VITUR_P3, new Double[] {1.85, 1.85, 1.125}).
-			build();
+		put(NPCWithXpBoost.TEKTON, new Double[] {1.35, 1.5}).
+		put(NPCWithXpBoost.TEKTON_ENRAGED, new Double[] {1.525, 1.775}).
+		put(NPCWithXpBoost.ICE_DEMON, new Double[] {1.525, 1.775}).
+		put(NPCWithXpBoost.LIZARDMAN_SHAMAN, new Double[] {1.175, 1.275}).
+		put(NPCWithXpBoost.VANGUARD_MELEE, new Double[] {1.075, 1.125}).
+		put(NPCWithXpBoost.VANGUARD_RANGED, new Double[] {1.05, 1.075}).
+		put(NPCWithXpBoost.VANGUARD_MAGIC, new Double[] {1.275, 1.40}).
+		put(NPCWithXpBoost.GUARDIAN, new Double[] {1.075, 1.1}).
+		put(NPCWithXpBoost.VASA_NISTIRIO, new Double[] {1.075, 1.1}).
+		put(NPCWithXpBoost.VASA_CRYSTALS, new Double[] {1.025, 1.025}).
+		put(NPCWithXpBoost.SKELETAL_MYSTIC, new Double[] {1.2, 1.3}).
+		put(NPCWithXpBoost.MUTTADILE_SMALL, new Double[] {1.125, 1.225}).
+		put(NPCWithXpBoost.MUTTADILE_LARGE, new Double[] {1.2, 1.35}).
+		put(NPCWithXpBoost.PESTILENT_BLOAT, new Double[] {1.85, 1.975, 1.075}).
+		put(NPCWithXpBoost.NYLOCAS_VASILIAS, new Double[] {1.225, 1.225, 1.025}).
+		put(NPCWithXpBoost.SOTETSEG, new Double[] {1.675, 1.675, 1.045}).
+		put(NPCWithXpBoost.VERZIK_VITUR_P1, new Double[] {1.05, 1.05, 1.005}).
+		put(NPCWithXpBoost.VERZIK_VITUR_P2, new Double[] {1.425, 1.425, 1.025}).
+		put(NPCWithXpBoost.VERZIK_VITUR_P3, new Double[] {1.85, 1.85, 1.125}).
+		build();
 
+	// TOA XP multipliers are derived from an NPC's stats; to calculate these for a particular raid level, the base
+	// stats must be known. Format is:
+	// [HP, Attack, Strength, Defense, Stab Defense, Slash Defense, Crush Defense, Attack Bonus, Strength Bonus]
+	private static final ImmutableMap<NPCWithXpBoost, Integer[]> TOA_NPC_BASE_STATS = ImmutableMap.<NPCWithXpBoost, Integer[]>builder().
+		put(NPCWithXpBoost.KEPHRI,               new Integer[] {150,   0,   0,  80,  60, 300, 100,   0,   0}).
+		put(NPCWithXpBoost.AGILE_SCARAB,         new Integer[] { 30,  60,  20,   5,   0,   0,   0,   0,  25}).
+		put(NPCWithXpBoost.SOLDIER_SCARAB,       new Integer[] { 40,  75,  80,  80,  15, 250,  30, 100,  55}).
+		put(NPCWithXpBoost.SPITTING_SCARAB,      new Integer[] { 40,   1,  80,  80,  15, 250,  30,   0,  55}).
+		put(NPCWithXpBoost.ARCANE_SCARAB,        new Integer[] { 40,  75,  80,  80,  15, 250,  30,   0,  55}).
+		put(NPCWithXpBoost.SCARAB_TOA,           new Integer[] { 12,  20,  32,  28,   0,   0,   0,   0,   0}).
+		put(NPCWithXpBoost.AKKHA,                new Integer[] {400, 100, 140,  80,  60, 120, 120, 115,  30}).
+		put(NPCWithXpBoost.AKKHAS_SHADOW,        new Integer[] { 70, 100, 140,  30,  60, 120, 120, 115,  30}).
+		put(NPCWithXpBoost.BABA,                 new Integer[] {380, 150, 160,  80,  80, 150, 240,   0,  26}).
+		put(NPCWithXpBoost.BABOON_TOA,           new Integer[] {  0,   0,   0,   0,   0,   0,   0,   0,   0}).
+		put(NPCWithXpBoost.BABOON_BRAWLER_SMALL, new Integer[] {  4,  40,  40,  12, 900, 900, 900,  20,   0}).
+		put(NPCWithXpBoost.BABOON_BRAWLER_LARGE, new Integer[] {  8,  60,  60,  20, 900, 900, 900,  25,   0}).
+		put(NPCWithXpBoost.BABOON_THROWER_SMALL, new Integer[] {  4,  40,  40,  12, -50, -50, -50,  20,   0}).
+		put(NPCWithXpBoost.BABOON_THROWER_LARGE, new Integer[] {  8,  60,  60,  20, -50, -50, -50,  25,   0}).
+		put(NPCWithXpBoost.BABOON_MAGE_SMALL,    new Integer[] {  4,  40,  40,  12, 900, 900, 900,  20,   0}).
+		put(NPCWithXpBoost.BABOON_MAGE_LARGE,    new Integer[] {  8,  60,  60,  20, 900, 900, 900,  25,   0}).
+		put(NPCWithXpBoost.BABOON_SHAMAN,        new Integer[] { 16,  60,  60,  20, 900, 900, 900,  25,   0}).
+		put(NPCWithXpBoost.CURSED_BABOON,        new Integer[] { 10,  60,  60,  20, 900, 900, 900,  25,   0}).
+		put(NPCWithXpBoost.VOLATILE_BABOON,      new Integer[] {  8,  60,  60,  20, 900, 900, 900,  25,   0}).
+		put(NPCWithXpBoost.BABOON_THRALL,        new Integer[] {  2,  40,  40,  12,   0,   0,   0,  20,   0}).
+		put(NPCWithXpBoost.ZEBAK,                new Integer[] {580, 250, 140,  70, 160, 160, 260, 160, 100}).
+		put(NPCWithXpBoost.CROCODILE_TOA,        new Integer[] { 30, 150,  60, 100, 150, 350, 350,   0, 100}).
+		put(NPCWithXpBoost.OBELISK,              new Integer[] {260, 200, 150, 100,  70,  70,  70,   0,   0}).
+		put(NPCWithXpBoost.CORE,                 new Integer[] {  0,   0,   0,   0,   0,   0,   0,   0,   0}).
+		put(NPCWithXpBoost.ELIDINIS_WARDEN_P2,   new Integer[] {140, 300, 150, 100,  70,  70,  70,   0,  10}).
+		put(NPCWithXpBoost.TUMEKENS_WARDEN_P2,   new Integer[] {140, 300, 150, 100,  70,  70,  70,   0,  25}).
+		put(NPCWithXpBoost.WARDENS_P3,           new Integer[] {880, 150, 150, 150,  40,  40,  20,   0,  40}).
+		build();
+
+	private HashMap<NPCWithXpBoost, Double> TOA_XP_MODIFIERS = new HashMap<NPCWithXpBoost, Double>();
+
+	private HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
+  
 	private final HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
 
 	@Provides
@@ -259,7 +300,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception {
 		overlayManager.add(overlay);
-		reloadCustomXP();
+		updateCustomXP();
+		clientThread.invoke(() -> updateToaModifiers());
 
 		log.info("InstantDamageCalculator started!");
 	}
@@ -274,7 +316,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged configChanged) {
 		if (configChanged.getKey().equals("customBonusXP")) {
-			reloadCustomXP();
+			updateCustomXP();
 		}
 	}
 
@@ -322,11 +364,20 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			if (diff > 0) {
 				double modifier = 1.0;
 
-				if(CUSTOM_XP_MODIFIERS.containsKey(lastOpponentID)) {
+				if(CUSTOM_XP_MODIFIERS.containsKey(lastOpponentID))
+				{
 					modifier = CUSTOM_XP_MODIFIERS.get(lastOpponentID);
-				} else if (XP_MODIFIERS_WITH_MODES.containsKey(lastOpponent)) {
+				}
+				else if (XP_MODIFIERS_WITH_MODES.containsKey(lastOpponent))
+				{
 					modifier = XP_MODIFIERS_WITH_MODES.get(lastOpponent)[mode];
-				} else {
+				}
+				else if (TOA_XP_MODIFIERS.containsKey(lastOpponent))
+				{
+					modifier = TOA_XP_MODIFIERS.get(lastOpponent);
+				}
+				else
+				{
 					modifier = XP_MODIFIERS.getOrDefault(lastOpponent, 1.0);
 				}
 
@@ -372,7 +423,18 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		}
 	}
 
-	private void processXpDrop(int widgetId) {
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded widgetLoaded)
+	{
+		int toaWidgetID = 481;
+		if(widgetLoaded.getGroupId() == toaWidgetID)
+		{
+			updateToaModifiers();
+		}
+	}
+
+	private void processXpDrop(int widgetId)
+	{
 		final Widget xpdrop = client.getWidget(widgetId);
 		final Widget[] children = xpdrop.getChildren();
 		// child 0 is the xpdrop text, everything else are sprite ids for skills
@@ -414,13 +476,14 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		}
 	}
 
-	private void reloadCustomXP() {
+	private void updateCustomXP()
+	{
 		CUSTOM_XP_MODIFIERS.clear();
 
 		for (String customRaw : config.customBonusXP().split("\n")) {
 			if (customRaw.trim().equals("")) continue;
 			String[] split = customRaw.split(":");
-			if (split.length != 2) continue;
+			if (split.length < 2) continue;
 
 			Integer customID;
 			Double customXP;
@@ -473,8 +536,157 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			resetTotalHit();
 		}
 	}
-
+  
 	private void resetTotalHit() {
 		totalHit = 0;
+  }
+
+	private void updateToaModifiers()
+	{
+		// only update if inside the central ToA room, where all four path levels can be seen
+		int[] regions = client.getMapRegions();
+		if (regions.length != 1) return;
+		if (regions[0] != 14160) return;
+
+		// Need raid level, path level, group size to calculate xp modifiers
+		int parentWidget = 481;
+		int scabarasWidget = 49;
+		int hetWidget = 51;
+		int apmekenWidget = 53;
+		int crondisWidget = 55;
+
+		int toaRaidLevel = client.getVarbitValue(Varbits.TOA_RAID_LEVEL);
+		int toaGroupSize = 0;
+		if (client.getVarbitValue(Varbits.TOA_MEMBER_0_HEALTH) > 0) toaGroupSize++;
+		if (client.getVarbitValue(Varbits.TOA_MEMBER_1_HEALTH) > 0) toaGroupSize++;
+		if (client.getVarbitValue(Varbits.TOA_MEMBER_2_HEALTH) > 0) toaGroupSize++;
+		if (client.getVarbitValue(Varbits.TOA_MEMBER_3_HEALTH) > 0) toaGroupSize++;
+		if (client.getVarbitValue(Varbits.TOA_MEMBER_4_HEALTH) > 0) toaGroupSize++;
+		if (client.getVarbitValue(Varbits.TOA_MEMBER_5_HEALTH) > 0) toaGroupSize++;
+		if (client.getVarbitValue(Varbits.TOA_MEMBER_6_HEALTH) > 0) toaGroupSize++;
+		if (client.getVarbitValue(Varbits.TOA_MEMBER_7_HEALTH) > 0) toaGroupSize++;
+
+		// failsafe?
+		if (toaGroupSize == 0) toaGroupSize = 1;
+
+		int toaScabarasLevel;
+		int toaHetLevel;
+		int toaApmekenLevel;
+		int toaCrondisLevel;
+
+		try
+		{
+			toaScabarasLevel = Integer.parseInt(client.getWidget(parentWidget, scabarasWidget).getText());
+			toaHetLevel      = Integer.parseInt(client.getWidget(parentWidget, hetWidget     ).getText());
+			toaApmekenLevel  = Integer.parseInt(client.getWidget(parentWidget, apmekenWidget ).getText());
+			toaCrondisLevel  = Integer.parseInt(client.getWidget(parentWidget, crondisWidget ).getText());
+		}
+		catch (NullPointerException e)
+		{
+			return;
+		}
+		catch (NumberFormatException e)
+		{
+			return;
+		}
+
+		// HP multiplier from raid level
+		// 5 raid levels is worth +2% health
+		double raidMultiplier = 1 + 0.004*toaRaidLevel;
+
+		// HP multiplier from group size
+		// Group member 1 is worth 1.0, members 2-3 are worth 0.9, members 4-8 are worth 0.6
+		double groupMultiplier = 1;
+		if(toaGroupSize >= 2) groupMultiplier += 0.9;
+		if(toaGroupSize >= 3) groupMultiplier += 0.9;
+		if(toaGroupSize >= 4) groupMultiplier += (toaGroupSize - 3)*0.6;
+
+		// HP multiplier from path level
+		// Path level 1 is worth +8%; 2-6 are worth +5% each
+		double scabarasMultiplier = 1 + (toaScabarasLevel > 0 ? 0.08 : 0) + (toaScabarasLevel > 1 ? 0.05*(toaScabarasLevel - 1) : 0);
+		double hetMultiplier      = 1 + (     toaHetLevel > 0 ? 0.08 : 0) + (     toaHetLevel > 1 ? 0.05*(     toaHetLevel - 1) : 0);
+		double apmekenMultiplier  = 1 + ( toaApmekenLevel > 0 ? 0.08 : 0) + ( toaApmekenLevel > 1 ? 0.05*( toaApmekenLevel - 1) : 0);
+		double crondisMultiplier  = 1 + ( toaCrondisLevel > 0 ? 0.08 : 0) + ( toaCrondisLevel > 1 ? 0.05*( toaCrondisLevel - 1) : 0);
+
+		// Universal multiplier (used by NPCs in puzzles such as monkeys/crocodiles, as well as Wardens)
+		double commonMultiplier = raidMultiplier*groupMultiplier;
+
+		// Path-specific multipliers (used by path bosses + adds)
+		double kephriMultiplier = commonMultiplier*scabarasMultiplier;
+		double akkhaMultiplier  = commonMultiplier*hetMultiplier;
+		double babaMultiplier   = commonMultiplier*apmekenMultiplier;
+		double zebakMultiplier  = commonMultiplier*crondisMultiplier;
+
+		// Path of Scabaras
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.KEPHRI,          calculateToaModifier(NPCWithXpBoost.KEPHRI,          kephriMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.SOLDIER_SCARAB,  calculateToaModifier(NPCWithXpBoost.SOLDIER_SCARAB,  kephriMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.SPITTING_SCARAB, calculateToaModifier(NPCWithXpBoost.SPITTING_SCARAB, kephriMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.ARCANE_SCARAB,   calculateToaModifier(NPCWithXpBoost.ARCANE_SCARAB,   kephriMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.AGILE_SCARAB,    calculateToaModifier(NPCWithXpBoost.AGILE_SCARAB,    kephriMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.SCARAB_TOA,      calculateToaModifier(NPCWithXpBoost.SCARAB_TOA,      commonMultiplier));
+
+		// Path of Het
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.AKKHA,         calculateToaModifier(NPCWithXpBoost.AKKHA,         akkhaMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.AKKHAS_SHADOW, calculateToaModifier(NPCWithXpBoost.AKKHAS_SHADOW, akkhaMultiplier));
+
+		// Path of Apmeken
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABA,                 calculateToaModifier(NPCWithXpBoost.BABA,                 babaMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABOON_TOA,           1.0); // Baboons in Ba-ba fight do not seem to scale
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABOON_BRAWLER_SMALL, calculateToaModifier(NPCWithXpBoost.BABOON_BRAWLER_SMALL, commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABOON_BRAWLER_LARGE, calculateToaModifier(NPCWithXpBoost.BABOON_BRAWLER_LARGE, commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABOON_THROWER_SMALL, calculateToaModifier(NPCWithXpBoost.BABOON_THROWER_SMALL, commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABOON_THROWER_LARGE, calculateToaModifier(NPCWithXpBoost.BABOON_THROWER_LARGE, commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABOON_MAGE_SMALL,    calculateToaModifier(NPCWithXpBoost.BABOON_MAGE_SMALL,    commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABOON_MAGE_LARGE,    calculateToaModifier(NPCWithXpBoost.BABOON_MAGE_LARGE,    commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABOON_SHAMAN,        calculateToaModifier(NPCWithXpBoost.BABOON_SHAMAN,        commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.CURSED_BABOON,        calculateToaModifier(NPCWithXpBoost.CURSED_BABOON,        commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.VOLATILE_BABOON,      calculateToaModifier(NPCWithXpBoost.VOLATILE_BABOON,      commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.BABOON_THRALL,        calculateToaModifier(NPCWithXpBoost.BABOON_THRALL,        commonMultiplier));
+
+		// Path of Crondis
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.ZEBAK,         calculateToaModifier(NPCWithXpBoost.ZEBAK,         zebakMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.CROCODILE_TOA, calculateToaModifier(NPCWithXpBoost.CROCODILE_TOA, commonMultiplier));
+
+		// Wardens
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.OBELISK,            calculateToaModifier(NPCWithXpBoost.OBELISK,            commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.CORE,               1.0); // No bonus XP on the core
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.ELIDINIS_WARDEN_P2, calculateToaModifier(NPCWithXpBoost.ELIDINIS_WARDEN_P2, commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.TUMEKENS_WARDEN_P2, calculateToaModifier(NPCWithXpBoost.TUMEKENS_WARDEN_P2, commonMultiplier));
+		TOA_XP_MODIFIERS.put(NPCWithXpBoost.WARDENS_P3,         calculateToaModifier(NPCWithXpBoost.WARDENS_P3,         commonMultiplier));
 	}
+
+	private double calculateToaModifier(NPCWithXpBoost npc, double multiplier)
+	{
+		Integer[] baseStats = TOA_NPC_BASE_STATS.get(npc);
+		int attack        = baseStats[1];
+		int strength      = baseStats[2];
+		int defense       = baseStats[3];
+		int stabDefense   = baseStats[4];
+		int slashDefense  = baseStats[5];
+		int crushDefense  = baseStats[6];
+		int attackBonus   = baseStats[7];
+		int strengthBonus = baseStats[8];
+
+		// HP is the only stat affected by the raid multiplier (and is then rounded to the nearest 10)
+		double rawHP = ((double)baseStats[0])*multiplier;
+		int hp = (int) Math.round(rawHP/10)*10;
+
+		// ToA bonus XP multiplier works in multiples of 0.025 (call them bands)
+		// First step is to figure out which band an enemy is scaled to:
+		//     band = floor(M*(D+A+S)/5120), where:
+		//         M is the average of HP/attack/strength/defense, floored
+		//         D is the average of stab/slash/crush defense, floored
+		//         A is the attack bonus
+		//         S is the strength bonus
+		// Then the final bonus XP bonus is:
+		//     bonusXP = 1 + band*0.025
+		int M = (hp + attack + strength + defense)/4;
+		int D = (stabDefense + slashDefense + crushDefense)/3;
+		int MDAS = M*(D + attackBonus + strengthBonus);
+		// defensive bonuses can be negative; if D + A + S < 0 then it's set to 0 instead
+		if(MDAS < 0) MDAS = 0;
+		int band = MDAS/5120;
+		return  1 + band*0.025;
+	}
+
 }
