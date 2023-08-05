@@ -55,6 +55,9 @@ public enum NPCWithXpBoost {
     UMBRA(NpcID.UMBRA),
     CRUOR(NpcID.CRUOR),
     GLACIES(NpcID.GLACIES),
+    DUKE_SUCELLUS(NpcID.DUKE_SUCELLUS_12191),
+    VARDORVIS(NpcID.VARDORVIS),
+    LEVIATHAN(NpcID.THE_LEVIATHAN),
 
     //Slayer tasks (Krystilia, Duradel, Nieve, Konar) and related Npcs
     BANDIT_130(NpcID.BANDIT_6605),
