@@ -106,6 +106,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			put(NPCWithXpBoost.UMBRA, 1.075).
 			put(NPCWithXpBoost.CRUOR, 1.05).
 			put(NPCWithXpBoost.GLACIES, 1.05).
+			put(NPCWithXpBoost.DUKE_SUCELLUS, 1.55).
+			put(NPCWithXpBoost.VARDORVIS, 1.55).
+			put(NPCWithXpBoost.LEVIATHAN, 1.975).
 			put(NPCWithXpBoost.BANDIT_130, 1.025).
 			put(NPCWithXpBoost.BLACK_DRAGON, 1.05).
 			put(NPCWithXpBoost.BRUTAL_BLACK_DRAGON, 1.1).
