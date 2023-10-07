@@ -34,7 +34,7 @@ class InstantDamageCalculatorOverlay extends OverlayPanel
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!config.displayDamageOverlay()) {
+		if (!config.displayDamageOverlay() || (config.expiry() != 0 && plugin.isOverlayExpired())) {
 			return null;
 		}
 

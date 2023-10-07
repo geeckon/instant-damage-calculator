@@ -18,6 +18,8 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 import static net.runelite.api.ScriptID.XPDROPS_SETDROPSIZE;
@@ -293,6 +295,11 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 	private HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
 
+	private Instant expiryTimer;
+
+	@Getter
+	private boolean overlayExpired = true;
+
 	@Provides
 	InstantDamageCalculatorConfig provideConfig(ConfigManager configManager) {
 		return configManager.getConfig(InstantDamageCalculatorConfig.class);
@@ -318,6 +325,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	public void onConfigChanged(ConfigChanged configChanged) {
 		if (configChanged.getKey().equals("customBonusXP")) {
 			updateCustomXP();
+		}
+		if (configChanged.getKey().equals("expiry") && config.expiry() != 0) {
+			expireOverlay();
 		}
 	}
 
@@ -385,6 +395,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 				hit = (int) Math.round(diff / 1.33 / modifier);
 				xp = newXp;
 				totalHit += hit;
+
+				enableExpiryTimer();
 			}
 		}
 	}
@@ -546,7 +558,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	{
 		// only update if inside the central ToA room, where all four path levels can be seen
 		int[] regions = client.getMapRegions();
-		if (regions.length != 1) return;
+		if (regions == null || regions.length != 1) return;
 		if (regions[0] != 14160) return;
 
 		// Need raid level, path level, group size to calculate xp modifiers
@@ -688,6 +700,32 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		if(MDAS < 0) MDAS = 0;
 		int band = MDAS/5120;
 		return  1 + band*0.025;
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick tick)
+	{
+		if (expiryTimer != null && config.expiry() != 0)
+		{
+			Duration timeSinceUpdate = Duration.between(expiryTimer, Instant.now());
+			Duration expiryTimeout = Duration.ofSeconds(config.expiry());
+
+			if (timeSinceUpdate.compareTo(expiryTimeout) >= 0)
+			{
+				expireOverlay();
+			}
+		}
+	}
+
+	private void expireOverlay()
+	{
+		overlayExpired = true;
+	}
+
+	private void enableExpiryTimer()
+	{
+		expiryTimer = Instant.now();
+		overlayExpired = false;
 	}
 
 }
