@@ -91,4 +91,15 @@ public interface InstantDamageCalculatorConfig extends Config
         return false;
     }
 
+    @ConfigItem(
+            keyName = "resetOnBarrowsCryptEntry",
+            name = "Reset total damage on Barrows Crypt entry",
+            description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the player enters a Barrows crypt",
+            position = 8
+    )
+    default boolean resetOnBarrowsCryptEntry()
+    {
+        return false;
+    }
+
 }

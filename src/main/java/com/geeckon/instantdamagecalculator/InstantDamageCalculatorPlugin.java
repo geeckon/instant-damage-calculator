@@ -344,6 +344,10 @@ public class InstantDamageCalculatorPlugin extends Plugin
 				case "You enter the Theatre of Blood (Hard Mode)...":
 					mode = 1;
 					break;
+				case "You've broken into a crypt!":
+					if (config.resetOnBarrowsCryptEntry()) {
+						resetTotalHit();
+					}
 			}
 		} else if (chatMessage.getType() == ChatMessageType.FRIENDSCHATNOTIFICATION) {
 			if (Text.removeTags(chatMessage.getMessage()).equals("The raid has begun!")) {
