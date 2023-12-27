@@ -39,25 +39,40 @@ class InstantDamageCalculatorOverlay extends OverlayPanel
 		}
 
 		final Color strColor = new Color(238, 51, 51);
+		final String intStr = String.valueOf((int) plugin.getHit());
 		final String str = String.valueOf(plugin.getHit());
 		final String leftText = config.displayOverlayText() ? "Current hit:" : "";
 
-		panelComponent.getChildren().add(LineComponent.builder()
-				.left(leftText)
-				.right(str)
-				.rightColor(strColor)
-				.build());
+		/**
+		 * This is a mess because I couldn't figure out how to condense this, so I wrote it very explicitly. I'm tired
+		 */
+		final LineComponent.LineComponentBuilder hitLine = LineComponent.builder()
+			.left(leftText)
+			.rightColor(strColor);
+
+		if (config.precision() == 0) {
+			hitLine.right(intStr);
+		} else {
+			hitLine.right(str);
+		}
+		panelComponent.getChildren().add(hitLine.build());
 
 
 		if (config.displayTotalDamageOverlay()) {
+			final String intTotalStr = String.valueOf((int) plugin.getTotalHit());
 			final String totalStr = String.valueOf(plugin.getTotalHit());
 			final String leftTotalText = config.displayOverlayText() ? "Total hit:" : "";
 
-			panelComponent.getChildren().add(LineComponent.builder()
+			final LineComponent.LineComponentBuilder totalHitLine = LineComponent.builder()
 					.left(leftTotalText)
-					.right(totalStr)
-					.rightColor(strColor)
-					.build());
+					.rightColor(strColor);
+
+			if (config.precision() == 0) {
+				totalHitLine.right(intTotalStr);
+			} else {
+				totalHitLine.right(totalStr);
+			}
+			panelComponent.getChildren().add(totalHitLine.build());
 		}
 
 		return super.render(graphics);

@@ -51,10 +51,10 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	private int lastOpponentID = -1;
 
 	@Getter
-	private int hit = 0;
+	private double hit = 0;
 
 	@Getter
-	private int totalHit = 0;
+	private double totalHit = 0;
 	private int equippedWeaponTypeVarbit = -1;
 	private int activeProtectionPrayerVarbit = -1;
 	private int mode = 0;
@@ -329,6 +329,10 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		if (configChanged.getKey().equals("expiry") && config.expiry() != 0) {
 			expireOverlay();
 		}
+		if (configChanged.getKey().equals("precision")) {
+			hit = roundToPrecision(getHit());
+			totalHit = roundToPrecision(getTotalHit());
+		}
 	}
 
 	@Subscribe
@@ -396,9 +400,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 					modifier = XP_MODIFIERS.getOrDefault(lastOpponent, 1.0);
 				}
 
-				hit = (int) Math.round(diff / 1.33 / modifier);
+				hit = roundToPrecision(diff / 1.33 / modifier);
 				xp = newXp;
-				totalHit += hit;
+				totalHit = roundToPrecision(totalHit + hit);
 
 				enableExpiryTimer();
 			}
@@ -478,7 +482,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			int spriteId = spriteIDs[i];
 			if (spriteId == SpriteID.SKILL_HITPOINTS) {
 				// If xp drop contains HITPOINTS sprite, replace it with the hit
-				text.setText(hit + "");
+				text.setText((int) Math.round(hit) + "");
 				return;
 			} else if (spriteId == SpriteID.SKILL_ATTACK || spriteId == SpriteID.SKILL_STRENGTH ||
 					spriteId == SpriteID.SKILL_DEFENCE || spriteId == SpriteID.SKILL_RANGED ||
@@ -730,6 +734,12 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	{
 		expiryTimer = Instant.now();
 		overlayExpired = false;
+	}
+
+	private double roundToPrecision(double hit)
+	{
+		int scale = (int) Math.pow(10, config.precision());
+		return (double) Math.round(hit * scale) / scale;
 	}
 
 }
