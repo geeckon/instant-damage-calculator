@@ -31,10 +31,21 @@ public interface InstantDamageCalculatorConfig extends Config
     }
 
     @ConfigItem(
+            keyName = "displayCurrentHit",
+            name = "Display current hit in overlay",
+            description = "If enabled, the overlay will include the latest damage hit",
+            position = 2
+    )
+    default boolean displayCurrentHit()
+    {
+        return true;
+    }
+
+    @ConfigItem(
             keyName = "displayOverlayText",
             name = "Display overlay text",
             description = "If enabled, informative text is displayed in the overlay",
-            position = 2
+            position = 3
     )
     default boolean displayOverlayText()
     {
@@ -45,7 +56,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "expiry",
             name = "Overlay Expiry",
             description = "Set the time until the overlay disappears",
-            position = 3
+            position = 4
     )
     @Units(Units.SECONDS)
     default int expiry() { return 10; }
@@ -54,7 +65,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "precision",
             name = "Precision",
             description = "Set the number of decimal places to display. 0 is suggested unless you understand how the plugin and xp rounding works. Only affects the overlay, not replaced xp drops",
-            position = 4
+            position = 5
     )
     default int precision() { return 0; }
 
@@ -62,7 +73,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "customBonusXP",
             name = "Custom NPC Bonus XP",
             description = "Add bonus XP modifiers for custom NPCs. Format is id:multiplier eg. \"12345:1.05\", once per line.",
-            position = 5
+            position = 6
     )
     default String customBonusXP() { return "// Phantom Muspah\n12077 : 2.075\n12078 : 2.075\n12079 : 2.075\n12080 : 2.075\n12082 : 2.075"; }
 
@@ -70,7 +81,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "displayTotalDamageOverlay",
             name = "Display total damage overlay",
             description = "If enabled, an overlay is displayed which shows the total damage done, including the current hit. This total can then be reset using one of the following configurations. Can be useful for the Phantom Muspah boss",
-            position = 6
+            position = 7
     )
     default boolean displayTotalDamageOverlay()
     {
@@ -81,7 +92,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "resetOnWeaponChange",
             name = "Reset total damage on weapon change",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the equipped weapon is changed",
-            position = 7
+            position = 8
     )
     default boolean resetOnWeaponChange()
     {
@@ -92,7 +103,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "resetOnPrayerChange",
             name = "Reset total damage on prayer change",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the player activates a protection prayer different from the one they previously activated",
-            position = 8
+            position = 9
     )
     default boolean resetOnPrayerChange()
     {
@@ -103,7 +114,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "resetOnBarrowsCryptEntry",
             name = "Reset total damage on Barrows Crypt entry",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the player enters a Barrows crypt",
-            position = 9
+            position = 10
     )
     default boolean resetOnBarrowsCryptEntry()
     {
