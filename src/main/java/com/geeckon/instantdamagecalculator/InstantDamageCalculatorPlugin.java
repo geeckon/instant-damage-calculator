@@ -370,7 +370,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 	@Subscribe
 	public void onFakeXpDrop(FakeXpDrop event) {
-        // Need this event for players with 200M hitpoints xp
+		// Need this event for players with 200M hitpoints xp
 		if (event.getSkill() == Skill.HITPOINTS) {
 			long diff = event.getXp();
 
@@ -391,39 +391,39 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			}
 
 			long diff = newXp - xp;
-            xp = newXp;
+			xp = newXp;
 
-            if (diff > 0) {
+			if (diff > 0) {
 				handleHitpointsXpDrop(diff);
-            }
+			}
 		}
 	}
 
-    private void handleHitpointsXpDrop(long diff) {
-        double modifier = 1.0;
+	private void handleHitpointsXpDrop(long diff) {
+		double modifier = 1.0;
 
-        if(CUSTOM_XP_MODIFIERS.containsKey(lastOpponentID))
-        {
-            modifier = CUSTOM_XP_MODIFIERS.get(lastOpponentID);
-        }
-        else if (XP_MODIFIERS_WITH_MODES.containsKey(lastOpponent))
-        {
-            modifier = XP_MODIFIERS_WITH_MODES.get(lastOpponent)[mode];
-        }
-        else if (TOA_XP_MODIFIERS.containsKey(lastOpponent))
-        {
-            modifier = TOA_XP_MODIFIERS.get(lastOpponent);
-        }
-        else
-        {
-            modifier = XP_MODIFIERS.getOrDefault(lastOpponent, 1.0);
-        }
+		if(CUSTOM_XP_MODIFIERS.containsKey(lastOpponentID))
+		{
+			modifier = CUSTOM_XP_MODIFIERS.get(lastOpponentID);
+		}
+		else if (XP_MODIFIERS_WITH_MODES.containsKey(lastOpponent))
+		{
+			modifier = XP_MODIFIERS_WITH_MODES.get(lastOpponent)[mode];
+		}
+		else if (TOA_XP_MODIFIERS.containsKey(lastOpponent))
+		{
+			modifier = TOA_XP_MODIFIERS.get(lastOpponent);
+		}
+		else
+		{
+			modifier = XP_MODIFIERS.getOrDefault(lastOpponent, 1.0);
+		}
 
-        hit = roundToPrecision(diff / 1.33 / modifier);
-        totalHit = roundToPrecision(totalHit + hit);
+		hit = roundToPrecision(diff / 1.33 / modifier);
+		totalHit = roundToPrecision(totalHit + hit);
 
-        enableExpiryTimer();
-    }
+		enableExpiryTimer();
+	}
 
 	@Subscribe
 	public void onInteractingChanged(InteractingChanged event) {
@@ -573,7 +573,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			resetTotalHit();
 		}
 	}
-
 	private void resetTotalHit() {
 		totalHit = 0;
   }
