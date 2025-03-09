@@ -80,7 +80,7 @@ public interface InstantDamageCalculatorConfig extends Config
     @ConfigItem(
             keyName = "excludedNpcIDs",
             name = "Excluded NPC IDs",
-            description = "NPC IDs to exclude from damage totalling. Enter one NPC ID per line.",
+            description = "NPC IDs to exclude from damage totalling. Enter one NPC ID per line.<br>If resetting on opponent change is enabled, attacking an excluded NPC will not reset total dmg.",
             position = 7
     )
     default String excludedNpcIDs() { return ""; }
@@ -125,6 +125,17 @@ public interface InstantDamageCalculatorConfig extends Config
             position = 11
     )
     default boolean resetOnBarrowsCryptEntry()
+    {
+        return false;
+    }
+
+    @ConfigItem(
+            keyName = "resetOnOpponentChange",
+            name = "Reset total damage on opponent change",
+            description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the player changes opponent",
+            position = 12
+    )
+    default boolean resetOnOpponentChange()
     {
         return false;
     }

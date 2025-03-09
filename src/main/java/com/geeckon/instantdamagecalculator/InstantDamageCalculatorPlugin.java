@@ -49,6 +49,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	private int xp = -1;
 	private NPCWithXpBoost lastOpponent;
 	private int lastOpponentID = -1;
+	private int lastValidOpponentID = -1;
 
 	@Getter
 	private double hit = 0;
@@ -320,6 +321,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception {
 		overlayManager.remove(overlay);
+		lastValidOpponentID = -1;
+		lastOpponentID = -1;
+		lastOpponent = null;
 
 		log.info("InstantDamageCalculator stopped!");
 	}
@@ -434,6 +438,13 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onNpcChanged(NpcChanged event) {
+		if (event.getOld().getId() == lastOpponentID) {
+			handleOpponentUpdate(event.getNpc());
+		}
+	}
+
+	@Subscribe
 	public void onInteractingChanged(InteractingChanged event) {
 		// Get current opponent to apply boss xp boost modifiers
 		if (event.getSource() != client.getLocalPlayer()) {
@@ -450,8 +461,20 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 		NPC npc = (NPC) opponent;
 
+		handleOpponentUpdate(npc);
+	}
+
+	private void handleOpponentUpdate(NPC npc) {
 		lastOpponentID = npc.getId();
 		lastOpponent = NPCWithXpBoost.getNpc(lastOpponentID);
+
+		// only reset total dmg if attacking a new, non-excluded NPC ID
+		if (!EXCLUDE_IDS.contains(npc.getId())) {
+			if (config.resetOnOpponentChange() && lastValidOpponentID != npc.getId()) {
+				resetTotalHit();
+			}
+			lastValidOpponentID = npc.getId();
+		}
 	}
 
 	@Subscribe(
