@@ -46,16 +46,18 @@ class InstantDamageCalculatorOverlay extends OverlayPanel
 		/**
 		 * This is a mess because I couldn't figure out how to condense this, so I wrote it very explicitly. I'm tired
 		 */
-		final LineComponent.LineComponentBuilder hitLine = LineComponent.builder()
-			.left(leftText)
-			.rightColor(strColor);
+		if (config.displayCurrentHit()) {
+			final LineComponent.LineComponentBuilder hitLine = LineComponent.builder()
+				.left(leftText)
+				.rightColor(strColor);
 
-		if (config.precision() == 0) {
-			hitLine.right(intStr);
-		} else {
-			hitLine.right(str);
+			if (config.precision() == 0) {
+				hitLine.right(intStr);
+			} else {
+				hitLine.right(str);
+			}
+			panelComponent.getChildren().add(hitLine.build());
 		}
-		panelComponent.getChildren().add(hitLine.build());
 
 
 		if (config.displayTotalDamageOverlay()) {
