@@ -296,8 +296,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 	private HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
 
-	private List<Integer> EXCLUDE_IDS = new ArrayList<>();
-
 	private Instant expiryTimer;
 
 	@Getter
@@ -312,7 +310,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	protected void startUp() throws Exception {
 		overlayManager.add(overlay);
 		updateCustomXP();
-		updateExcludedNpcIDs();
 		clientThread.invoke(() -> updateToaModifiers());
 
 		log.info("InstantDamageCalculator started!");
@@ -332,9 +329,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	public void onConfigChanged(ConfigChanged configChanged) {
 		if (configChanged.getKey().equals("customBonusXP")) {
 			updateCustomXP();
-		}
-		if (configChanged.getKey().equals("excludedNpcIDs")) {
-			updateExcludedNpcIDs();
 		}
 		if (configChanged.getKey().equals("expiry") && config.expiry() != 0) {
 			expireOverlay();
@@ -430,7 +424,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		}
 
 		hit = roundToPrecision(diff / 1.33 / modifier);
-		if (!EXCLUDE_IDS.contains(lastOpponentID)) {
+		if (config.resetOnMuspahPhase() && NpcID.PHANTOM_MUSPAH_12082 != lastOpponentID) {
 			totalHit = roundToPrecision(totalHit + hit);
 		}
 
@@ -469,8 +463,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		lastOpponent = NPCWithXpBoost.getNpc(lastOpponentID);
 
 		// only reset total dmg if attacking a new, non-excluded NPC ID
-		if (!EXCLUDE_IDS.contains(npc.getId())) {
-			if (config.resetOnOpponentChange() && lastValidOpponentID != npc.getId()) {
+		if (NpcID.PHANTOM_MUSPAH_12082 != npc.getId()) {
+			if (config.resetOnMuspahPhase() && lastValidOpponentID != npc.getId()) {
 				resetTotalHit();
 			}
 			lastValidOpponentID = npc.getId();
@@ -565,25 +559,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			}
 		}
 
-	}
-
-	private void updateExcludedNpcIDs()
-	{
-		EXCLUDE_IDS.clear();
-
-		for (String customRaw : config.excludedNpcIDs().split("\n")) {
-			String trimmed = customRaw.trim();
-			if (trimmed.isEmpty()) continue;
-
-			int customID;
-			try {
-				customID = Integer.parseInt(trimmed);
-				if (customID > 0) {
-					EXCLUDE_IDS.add(customID);
-				}
-			} catch (NumberFormatException ignored) {
-			}
-		}
 	}
 
 	@Subscribe

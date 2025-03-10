@@ -78,18 +78,10 @@ public interface InstantDamageCalculatorConfig extends Config
     default String customBonusXP() { return "// Phantom Muspah\n12077 : 2.075\n12078 : 2.075\n12079 : 2.075\n12080 : 2.075\n12082 : 2.075"; }
 
     @ConfigItem(
-            keyName = "excludedNpcIDs",
-            name = "Excluded NPC IDs",
-            description = "NPC IDs to exclude from damage totalling. Enter one NPC ID per line.<br>If resetting on opponent change is enabled, attacking an excluded NPC will not reset total dmg.",
-            position = 7
-    )
-    default String excludedNpcIDs() { return ""; }
-
-    @ConfigItem(
             keyName = "displayTotalDamageOverlay",
             name = "Display total damage overlay",
             description = "If enabled, an overlay is displayed which shows the total damage done, including the current hit. This total can then be reset using one of the following configurations. Can be useful for the Phantom Muspah boss",
-            position = 8
+            position = 7
     )
     default boolean displayTotalDamageOverlay()
     {
@@ -100,7 +92,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "resetOnWeaponChange",
             name = "Reset total damage on weapon change",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the equipped weapon is changed",
-            position = 9
+            position = 8
     )
     default boolean resetOnWeaponChange()
     {
@@ -111,7 +103,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "resetOnPrayerChange",
             name = "Reset total damage on prayer change",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the player activates a protection prayer different from the one they previously activated",
-            position = 10
+            position = 9
     )
     default boolean resetOnPrayerChange()
     {
@@ -122,7 +114,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "resetOnBarrowsCryptEntry",
             name = "Reset total damage on Barrows Crypt entry",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the player enters a Barrows crypt",
-            position = 11
+            position = 10
     )
     default boolean resetOnBarrowsCryptEntry()
     {
@@ -130,12 +122,12 @@ public interface InstantDamageCalculatorConfig extends Config
     }
 
     @ConfigItem(
-            keyName = "resetOnOpponentChange",
-            name = "Reset total damage on opponent change",
-            description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the player changes opponent",
-            position = 12
+            keyName = "resetOnMuspahPhase",
+            name = "Reset total damage on Muspah phase change",
+            description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever Muspah phase changes and will ignore teleport phase",
+            position = 11
     )
-    default boolean resetOnOpponentChange()
+    default boolean resetOnMuspahPhase()
     {
         return false;
     }
