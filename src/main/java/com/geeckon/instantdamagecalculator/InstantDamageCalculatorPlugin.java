@@ -49,7 +49,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	private int xp = -1;
 	private NPCWithXpBoost lastOpponent;
 	private int lastOpponentID = -1;
-	private int lastValidOpponentID = -1;
+	private int lastMuspahPhase = -1;
 
 	@Getter
 	private double hit = 0;
@@ -296,6 +296,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 	private HashMap<Integer, Double> CUSTOM_XP_MODIFIERS = new HashMap<Integer, Double>();
 
+	private static final List<Integer> MUSPAH_IDS = new ArrayList<>(Arrays.asList(NpcID.PHANTOM_MUSPAH,
+			NpcID.PHANTOM_MUSPAH_12078, NpcID.PHANTOM_MUSPAH_12079, NpcID.PHANTOM_MUSPAH_12080, NpcID.PHANTOM_MUSPAH_12082));
+
 	private Instant expiryTimer;
 
 	@Getter
@@ -318,7 +321,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception {
 		overlayManager.remove(overlay);
-		lastValidOpponentID = -1;
+		lastMuspahPhase = -1;
 		lastOpponentID = -1;
 		lastOpponent = null;
 
@@ -404,6 +407,10 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	}
 
 	private void handleHitpointsXpDrop(long diff) {
+		if (config.resetOnMuspahPhase() && lastOpponentID == NpcID.PHANTOM_MUSPAH_12082) {
+			return;
+		}
+
 		double modifier = 1.0;
 
 		if(CUSTOM_XP_MODIFIERS.containsKey(lastOpponentID))
@@ -424,17 +431,19 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		}
 
 		hit = roundToPrecision(diff / 1.33 / modifier);
-		if (config.resetOnMuspahPhase() && NpcID.PHANTOM_MUSPAH_12082 != lastOpponentID) {
-			totalHit = roundToPrecision(totalHit + hit);
-		}
+		totalHit = roundToPrecision(totalHit + hit);
 
 		enableExpiryTimer();
 	}
 
 	@Subscribe
 	public void onNpcChanged(NpcChanged event) {
-		if (event.getOld().getId() == lastOpponentID) {
-			handleOpponentUpdate(event.getNpc());
+		int oldNpcID = event.getOld().getId();
+		int newNpcId = event.getNpc().getId();
+		if (config.resetOnMuspahPhase() && MUSPAH_IDS.contains(oldNpcID) && oldNpcID == lastMuspahPhase) {
+			lastOpponentID = newNpcId;
+			lastOpponent = NPCWithXpBoost.getNpc(lastOpponentID);
+			handleMuspahUpdate(newNpcId);
 		}
 	}
 
@@ -455,19 +464,22 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 		NPC npc = (NPC) opponent;
 
-		handleOpponentUpdate(npc);
-	}
-
-	private void handleOpponentUpdate(NPC npc) {
 		lastOpponentID = npc.getId();
 		lastOpponent = NPCWithXpBoost.getNpc(lastOpponentID);
 
-		// only reset total dmg if attacking a new, non-excluded NPC ID
-		if (NpcID.PHANTOM_MUSPAH_12082 != npc.getId()) {
-			if (config.resetOnMuspahPhase() && lastValidOpponentID != npc.getId()) {
+		if (config.resetOnMuspahPhase() && MUSPAH_IDS.contains(npc.getId())) {
+			handleMuspahUpdate(npc.getId());
+		}
+	}
+
+	private void handleMuspahUpdate(int muspahID) {
+		if (muspahID == NpcID.PHANTOM_MUSPAH || muspahID == NpcID.PHANTOM_MUSPAH_12078) {
+			if (lastMuspahPhase != muspahID) {
 				resetTotalHit();
+				lastMuspahPhase = muspahID;
 			}
-			lastValidOpponentID = npc.getId();
+		} else if (muspahID == NpcID.PHANTOM_MUSPAH_12079 || muspahID == NpcID.PHANTOM_MUSPAH_12080) {
+			lastMuspahPhase = -1;
 		}
 	}
 
