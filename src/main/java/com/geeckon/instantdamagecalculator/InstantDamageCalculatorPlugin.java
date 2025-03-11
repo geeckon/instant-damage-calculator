@@ -407,10 +407,6 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	}
 
 	private void handleHitpointsXpDrop(long diff) {
-		if (config.resetOnMuspahPhase() && lastOpponentID == NpcID.PHANTOM_MUSPAH_12082) {
-			return;
-		}
-
 		double modifier = 1.0;
 
 		if(CUSTOM_XP_MODIFIERS.containsKey(lastOpponentID))
@@ -431,7 +427,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		}
 
 		hit = roundToPrecision(diff / 1.33 / modifier);
-		totalHit = roundToPrecision(totalHit + hit);
+		if (!config.resetOnMuspahPhase() || lastOpponentID != NpcID.PHANTOM_MUSPAH_12082) {
+			totalHit = roundToPrecision(totalHit + hit);
+		}
 
 		enableExpiryTimer();
 	}
