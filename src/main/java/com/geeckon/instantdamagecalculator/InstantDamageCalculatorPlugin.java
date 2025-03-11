@@ -473,11 +473,13 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	}
 
 	private void handleMuspahUpdate(int muspahID) {
+		// Muspah is in Range or Melee phase
 		if (muspahID == NpcID.PHANTOM_MUSPAH || muspahID == NpcID.PHANTOM_MUSPAH_12078) {
 			if (lastMuspahPhase != muspahID) {
 				resetTotalHit();
 				lastMuspahPhase = muspahID;
 			}
+		// Muspah is in Shield or Last Stand phase
 		} else if (muspahID == NpcID.PHANTOM_MUSPAH_12079 || muspahID == NpcID.PHANTOM_MUSPAH_12080) {
 			lastMuspahPhase = -1;
 		}
