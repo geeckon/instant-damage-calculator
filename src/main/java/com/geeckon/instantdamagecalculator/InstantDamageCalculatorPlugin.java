@@ -612,9 +612,10 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			resetTotalHit();
 		}
 	}
+
 	private void resetTotalHit() {
 		totalHit = 0;
-  }
+	}
 
 	private void updateToaModifiers()
 	{
@@ -782,6 +783,9 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	private void expireOverlay()
 	{
 		overlayExpired = true;
+		if (config.clearTotalOnOverlayExpiry()) {
+			resetTotalHit();
+		}
 	}
 
 	private void enableExpiryTimer()

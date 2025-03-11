@@ -89,10 +89,21 @@ public interface InstantDamageCalculatorConfig extends Config
     }
 
     @ConfigItem(
+            keyName = "clearTotalOnOverlayExpiry",
+            name = "Clear total damage on overlay expiry",
+            description = "If enabled, the total damage counter will be set to 0 when the overlay expires.",
+            position = 8
+    )
+    default boolean clearTotalOnOverlayExpiry()
+    {
+        return false;
+    }
+
+    @ConfigItem(
             keyName = "resetOnWeaponChange",
             name = "Reset total damage on weapon change",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the equipped weapon is changed",
-            position = 8
+            position = 9
     )
     default boolean resetOnWeaponChange()
     {
@@ -103,7 +114,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "resetOnPrayerChange",
             name = "Reset total damage on prayer change",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the player activates a protection prayer different from the one they previously activated",
-            position = 9
+            position = 10
     )
     default boolean resetOnPrayerChange()
     {
@@ -114,7 +125,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "resetOnBarrowsCryptEntry",
             name = "Reset total damage on Barrows Crypt entry",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever the player enters a Barrows crypt",
-            position = 10
+            position = 11
     )
     default boolean resetOnBarrowsCryptEntry()
     {
@@ -125,7 +136,7 @@ public interface InstantDamageCalculatorConfig extends Config
             keyName = "resetOnMuspahPhase",
             name = "Reset total damage on Muspah phase change",
             description = "If enabled with the \"Display total damage overlay\" setting, total damage will be reset whenever Muspah phase changes and will ignore teleport phase",
-            position = 11
+            position = 12
     )
     default boolean resetOnMuspahPhase()
     {
