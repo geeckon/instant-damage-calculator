@@ -442,6 +442,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	public void onNpcChanged(NpcChanged event) {
 		int oldNpcID = event.getOld().getId();
 		int newNpcId = event.getNpc().getId();
+		// Only pass NPC change information on if it's related to muspah change
 		if (config.resetOnMuspahPhase() && MUSPAH_IDS.contains(oldNpcID) && oldNpcID == lastMuspahPhase) {
 			lastOpponentID = newNpcId;
 			lastOpponent = NPCWithXpBoost.getNpc(lastOpponentID);
@@ -475,7 +476,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	}
 
 	private void handleMuspahUpdate(int muspahID) {
-		// Muspah is in Range or Melee phase
+		// Muspah changed between Range or Melee phase
 		if (muspahID == NpcID.PHANTOM_MUSPAH || muspahID == NpcID.PHANTOM_MUSPAH_12078) {
 			if (lastMuspahPhase != muspahID) {
 				resetTotalHit();
