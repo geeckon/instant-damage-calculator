@@ -406,6 +406,10 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		}
 	}
 
+	private boolean isBlockedByMuspahConfig() {
+		return !config.resetOnMuspahPhase() || lastOpponentID != NpcID.PHANTOM_MUSPAH_12082;
+	}
+
 	private void handleHitpointsXpDrop(long diff) {
 		double modifier = 1.0;
 
@@ -427,7 +431,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 		}
 
 		hit = roundToPrecision(diff / 1.33 / modifier);
-		if (!config.resetOnMuspahPhase() || lastOpponentID != NpcID.PHANTOM_MUSPAH_12082) {
+		if (isBlockedByMuspahConfig()) {
 			totalHit = roundToPrecision(totalHit + hit);
 		}
 
