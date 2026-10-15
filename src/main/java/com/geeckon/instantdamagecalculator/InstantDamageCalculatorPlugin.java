@@ -540,7 +540,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			int spriteId = spriteIDs[i];
 			if (spriteId == SpriteID.SKILL_HITPOINTS) {
 				// If xp drop contains HITPOINTS sprite, replace it with the hit
-				text.setText((int) Math.round(hit) + "");
+				setXpDropText(text, (int) Math.round(hit) + "");
 				return;
 			} else if (spriteId == SpriteID.SKILL_ATTACK || spriteId == SpriteID.SKILL_STRENGTH ||
 					spriteId == SpriteID.SKILL_DEFENCE || spriteId == SpriteID.SKILL_RANGED ||
@@ -551,7 +551,27 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 		// If xp drop contains any other combat sprite, remove it
 		if (hasOtherCombatDrop) {
-			text.setText("");
+			setXpDropText(text, "");
+		}
+	}
+
+	/**
+	 * Replaces the text of an xp drop while the xpdrops_setdropsize script is about to run.
+	 *
+	 * The script sizes the drop using the text it received as an argument (which is still on the
+	 * cs2 stack at this point), not the text that is currently on the widget. So only calling
+	 * setText() leaves the drop sized for the original text. This is very noticeable for players
+	 * with 200M hitpoints xp, because their original text contains the "no xp" icon
+	 * ("<img=11> 40"), which is much wider than the hit we replace it with.
+	 * Updating the argument on the stack as well makes the script size the drop for the new text.
+	 */
+	private void setXpDropText(Widget text, String newText) {
+		text.setText(newText);
+
+		final Object[] objectStack = client.getObjectStack();
+		final int objectStackSize = client.getObjectStackSize();
+		if (objectStack != null && objectStackSize > 0 && objectStack[objectStackSize - 1] instanceof String) {
+			objectStack[objectStackSize - 1] = newText;
 		}
 	}
 
