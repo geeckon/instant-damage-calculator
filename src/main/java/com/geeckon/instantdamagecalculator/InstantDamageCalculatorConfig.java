@@ -3,6 +3,7 @@ package com.geeckon.instantdamagecalculator;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Range;
 import net.runelite.client.config.Units;
 
 @ConfigGroup("instantDamageCalculator")
@@ -141,6 +142,30 @@ public interface InstantDamageCalculatorConfig extends Config
     default boolean resetOnMuspahPhase()
     {
         return false;
+    }
+
+    @ConfigItem(
+            keyName = "scaleXpDrops",
+            name = "Scale XP drops",
+            description = "If enabled, all xp drops are drawn at the size below: the skill icons are resized and the text is drawn by the plugin in a matching font (Verdana bold) instead of the game's fixed-size font. Applies to every xp drop, not only replaced ones",
+            position = 13
+    )
+    default boolean scaleXpDrops()
+    {
+        return false;
+    }
+
+    @ConfigItem(
+            keyName = "xpDropIconSize",
+            name = "XP drop size",
+            description = "Size of the skill icons and text in xp drops, in pixels. The game itself uses 16 (small) or 25 (medium/large). Requires \"Scale XP drops\"",
+            position = 14
+    )
+    @Range(min = 8, max = 64)
+    @Units(Units.PIXELS)
+    default int xpDropIconSize()
+    {
+        return 25;
     }
 
 }

@@ -18,6 +18,8 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.Text;
 
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -45,6 +47,15 @@ public class InstantDamageCalculatorPlugin extends Plugin
 
 	@Inject
 	private InstantDamageCalculatorOverlay overlay;
+
+	@Inject
+	private XpDropTextOverlay xpDropTextOverlay;
+
+	// Text per xp drop widget id, drawn by XpDropTextOverlay when "Scale XP drops" is enabled
+	@Getter
+	private final Map<Integer, String> xpDropTexts = new HashMap<>();
+	private int scaledDropWidgetId = -1;
+	private Font xpDropFont;
 
 	private int xp = -1;
 	private NPCWithXpBoost lastOpponent;
@@ -312,6 +323,7 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception {
 		overlayManager.add(overlay);
+		overlayManager.add(xpDropTextOverlay);
 		updateCustomXP();
 		clientThread.invoke(() -> updateToaModifiers());
 
@@ -321,6 +333,8 @@ public class InstantDamageCalculatorPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception {
 		overlayManager.remove(overlay);
+		overlayManager.remove(xpDropTextOverlay);
+		xpDropTexts.clear();
 		lastMuspahPhase = -1;
 		lastOpponentID = -1;
 		lastOpponent = null;
@@ -498,8 +512,71 @@ public class InstantDamageCalculatorPlugin extends Plugin
 			// This runs prior to the proc being invoked, so the arguments are still on the stack.
 			// Grab the first argument to the script.
 			final int widgetId = intStack[intStackSize - 4];
+			if (config.scaleXpDrops()) {
+				// The script signature is (component, int iconSize, fontmetrics, graphic, string text),
+				// so the int stack holds [component, iconSize, fontmetrics, graphic] at this point.
+				// The script sizes and positions the skill icons using iconSize.
+				intStack[intStackSize - 3] = config.xpDropIconSize();
+			}
 			processXpDrop(widgetId);
+			if (config.scaleXpDrops()) {
+				takeOverXpDropText(widgetId);
+			}
 		}
+	}
+
+	@Subscribe
+	public void onScriptPostFired(ScriptPostFired scriptPostFired) {
+		if (scriptPostFired.getScriptId() == XPDROPS_SETDROPSIZE && scaledDropWidgetId != -1) {
+			widenXpDrop(scaledDropWidgetId);
+			scaledDropWidgetId = -1;
+		}
+	}
+
+	/**
+	 * Remembers the text of an xp drop and blanks it in the game, so that {@link XpDropTextOverlay}
+	 * can draw it with our own (freely scalable) font instead of one of the game's fixed fonts.
+	 * The empty string is also put on the script stack, so the script sizes the drop for the icons
+	 * only; the room for our text is added afterwards in {@link #widenXpDrop(int)}.
+	 */
+	private void takeOverXpDropText(int widgetId) {
+		final Widget xpdrop = client.getWidget(widgetId);
+		if (xpdrop == null) {
+			return;
+		}
+		final Widget[] children = xpdrop.getChildren();
+		if (children == null || children.length == 0 || children[0] == null) {
+			return;
+		}
+		final Widget text = children[0];
+
+		xpDropTexts.put(widgetId, Text.removeTags(text.getText()).trim());
+		setXpDropText(text, "");
+		scaledDropWidgetId = widgetId;
+	}
+
+	private void widenXpDrop(int widgetId) {
+		final Widget xpdrop = client.getWidget(widgetId);
+		final String str = xpDropTexts.get(widgetId);
+		if (xpdrop == null || str == null || str.isEmpty()) {
+			return;
+		}
+
+		final FontMetrics fm = client.getCanvas().getFontMetrics(getXpDropFont());
+		xpdrop.setOriginalWidth(xpdrop.getOriginalWidth() + fm.stringWidth(str) + 2);
+		xpdrop.revalidate();
+	}
+
+	/**
+	 * Font used by {@link XpDropTextOverlay}; the size follows the icon size so one setting scales
+	 * the whole drop.
+	 */
+	Font getXpDropFont() {
+		final int size = config.xpDropIconSize();
+		if (xpDropFont == null || xpDropFont.getSize() != size) {
+			xpDropFont = new Font("Verdana", Font.BOLD, size);
+		}
+		return xpDropFont;
 	}
 
 	@Subscribe
